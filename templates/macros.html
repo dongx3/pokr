@@ -66,6 +66,52 @@
     </div>
 {%- endmacro %}
 
+{% macro list_more_ajax(url, pagesize=None) -%}
+    {% set pagesize = pagesize or 20 %}
+    {% set guids = guid_factory() %}
+
+    <script type="template/mustache" id="{{ guids('template') }}">
+        <li>{{ caller() }}</li>
+    </script>
+    <ul id="{{ guids('list') }}">
+    </ul>
+
+    <script>
+    (function () {
+        var tmpl = $("#{{ guids('template') }}").html(),
+            $list = $("#{{ guids('list') }}"),
+            page = 1;
+
+        function retrieve() {
+            $.get("{{ url|safe }}", {
+                page: page,
+                pagesize: {{ pagesize }}
+            }, function (res) {
+                res = JSON.parse(res);
+                $.each(res.data, function (i, item) {
+                    var html = Mustache.render(tmpl, item),
+                        $elem = $(html);
+                    $elem.appendTo($list);
+                });
+                if (!res.has_more) {
+                    $("#{{ guids('btn') }}").hide();
+                }
+            });
+            page += 1;
+            return false;
+        }
+
+        $(function () {
+            retrieve();
+        });
+
+        window.f{{ guids('func') }} = retrieve;
+    }());
+    </script>
+
+    <a id="{{ guids('btn') }}" class="btn-more" href="#" onclick="f{{ guids('func') }}()">{{ gettext('more') }}</a>
+{%- endmacro %}
+
 {% macro list_more(query, url, pagesize=None, layout='list', more=True) -%}
     {% set pagesize = pagesize or 20 %}
     {% set items = query.limit(pagesize+1).all() %}

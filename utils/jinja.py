@@ -20,6 +20,7 @@ def init_app(app):
     app.jinja_env.globals.update(assembly_term=assembly_term)
     app.jinja_env.globals.update(hasattr=hasattr)
     app.jinja_env.globals.update(url_for_query=url_for_query)
+    app.jinja_env.globals.update(guid_factory=guid_factory)
 
     app.breadcrumbed_views = {}
     @app.context_processor

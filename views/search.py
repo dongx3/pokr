@@ -14,11 +14,12 @@ from models.person import Person
 from models.region import Region
 from models.school import School
 from models.query_log import log_query
-from utils.jinja import breadcrumb
+from utils.jinja import breadcrumb, jsonify
 
 
 query = LocalProxy(lambda: request.args.get('query'))
 target = LocalProxy(lambda: request.args.get('target'))
+ajax = LocalProxy(lambda: request.args.get('ajax'))
 
 
 def register(app):
@@ -34,7 +35,26 @@ def register(app):
         results['bills']  , options['bills']   = search_bills()
         results['regions'], options['regions'] = search_regions()
         options = dict(chain(*(d.iteritems() for d in options.itervalues())))
-        return render_template('search-results.html', option_texts=options, **results)
+        if str(ajax) == '1':
+            page = int(request.args.get('page'))
+            pagesize = int(request.args.get('pagesize'))
+
+            data = results[str(target)]\
+                        .offset((page - 1) * pagesize)\
+                        .limit(pagesize + 1)\
+                        .all()
+            if len(data) > pagesize:
+                has_more = True
+                data = data[:pagesize]
+            else:
+                has_more = False
+
+            return jsonify({
+                'data': data,
+                'has_more': has_more
+            })
+        else:
+            return render_template('search-results.html', option_texts=options, **results)
 
 
     @if_target('people')

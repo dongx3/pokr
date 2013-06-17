@@ -91,8 +91,10 @@
                     <a href="{{ url_for('party', id=party.id) }}">{{ party.name }}</a>
                     {% endcall %}
                 {% else %}
-                    {% call(party) macro.list_more(parties, url_for_query(target='people')) %}
-                    <a href="{{ url_for('party', id=party.id) }}">{{ party.name }}</a>
+                    {% call(party) macro.list_more_ajax(url_for_query(ajax=1, target='parties')) %}
+                    {% raw %}
+                    <a href="{{ url }}">{{ name }}</a>
+                    {% endraw %}
                     {% endcall %}
                 {% endif %}
             </td>

@@ -1,3 +1,4 @@
+from flask import url_for
 from sqlalchemy import CHAR, Column, Integer, String, Unicode
 from sqlalchemy.orm import backref, relationship
 
@@ -20,6 +21,10 @@ class Party(Base):
         self.name = name
         if color:
             self.color = color
+
+    @property
+    def url(self):
+        return url_for('party', id=self.id)
 
     @property
     def members(self):
